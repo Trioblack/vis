@@ -1,7 +1,29 @@
 language: c
+
+os:
+  - linux
+  - osx
+
 compiler:
   - gcc
+  - clang
+
 env:
-  - CFLAGS=
-  - CFLAGS="-Wextra -Wno-missing-field-initializers -Wno-unused-parameter"
-script: make local
+  - TARGET=
+  - TARGET=debug
+
+install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      brew update &&
+      brew install libtermkey &&
+      brew install lua &&
+      luarocks install lpeg;
+    fi
+
+script:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      ./configure && make $TARGET;
+    else
+      make local && make clean && make $TARGET;
+    fi
+  - LD_LIBRARY_PATH="$(pwd)/dependency/install/usr/lib" make test
